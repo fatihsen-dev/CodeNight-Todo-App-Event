@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createList, updateLocalStore } from "../stores/lists";
+import { createList, deleteList, updateLocalStore } from "../stores/lists";
 import { NavLink } from "react-router-dom";
+import { TbTrashFilled } from "react-icons/Tb";
 
 export default function Home() {
    const inputRef = useRef();
@@ -12,6 +13,11 @@ export default function Home() {
       dispatch(createList(inputRef.current.value));
       dispatch(updateLocalStore());
       inputRef.current.value = "";
+   };
+
+   const deleteListHandle = (listid) => {
+      dispatch(deleteList(listid));
+      dispatch(updateLocalStore());
    };
 
    return (
@@ -29,13 +35,17 @@ export default function Home() {
                   </button>
                </div>
                {lists.map((list, index) => (
-                  <NavLink
-                     to={`/list/${list.id}`}
-                     key={index}
-                     className="hover:bg-blueDark transition-colors cursor-pointer px-2 py-0.5 rounded-sm"
-                  >
-                     {list.name}
-                  </NavLink>
+                  <li className="flex" key={index}>
+                     <NavLink
+                        to={`/list/${list.id}`}
+                        className="hover:bg-blueDark flex-1 transition-colors cursor-pointer px-2 py-0.5 rounded-sm"
+                     >
+                        {list.name}
+                     </NavLink>
+                     <button onClick={() => deleteListHandle(list.id)} className="ml-auto">
+                        <TbTrashFilled className="text-xl p-1 rounded-sm box-content transition-transform bg-light text-red hover:scale-110" />
+                     </button>
+                  </li>
                ))}
             </ul>
          </div>
