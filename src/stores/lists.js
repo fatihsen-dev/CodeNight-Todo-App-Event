@@ -17,7 +17,10 @@ export const listsSlice = createSlice({
       updateLocalStore: (state) => {
          localStorage.setItem("lists", JSON.stringify(state.lists));
       },
-      removeList: () => {},
+      deleteList: (state, action) => {
+         const lists = state.lists.filter((list) => list.id !== action.payload);
+         state.lists = lists;
+      },
       createTodo: (state, action) => {
          return {
             ...state,
@@ -27,7 +30,7 @@ export const listsSlice = createSlice({
                   ...state.lists.find((list) => list.id === action.payload.listid),
                   todos: [
                      ...state.lists.find((list) => list.id === action.payload.listid).todos,
-                     { text: action.payload.text, status: 0, id: uuidv4() },
+                     { text: action.payload.text, status: 0, id: uuidv4(), isEdited: false },
                   ],
                },
             ],
@@ -40,9 +43,12 @@ export const listsSlice = createSlice({
          const findedTodo = findedList.todos.find((todo) => todo.id === action.payload.todoid);
          state.lists = [...lists, { ...findedList, todos: [...todos, { ...findedTodo, status: action.payload.status }] }];
       },
+      editTodo: (state, action) => {
+         state.lists = action.payload;
+      },
    },
 });
 
-export const { createList, removeList, createTodo, updateLocalStore, updateStatus } = listsSlice.actions;
+export const { createList, deleteList, createTodo, updateLocalStore, updateStatus, editTodo } = listsSlice.actions;
 
 export default listsSlice.reducer;
