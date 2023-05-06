@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { updateStatus, createTodo, updateLocalStore } from "../stores/lists";
+import { updateStatus, createTodo, updateLocalStore, editTodo } from "../stores/lists";
 import { TbTrashFilled } from "react-icons/Tb";
 import { IoMdCheckmark } from "react-icons/io";
 import { BsThreeDots } from "react-icons/bs";
@@ -63,6 +63,16 @@ export default function List() {
       dispatch(updateLocalStore());
    };
 
+   const editHandle = (e, todoid) => {
+      let withoutLists = lists.filter((l) => l.id !== list.id);
+      const findedList = lists.find((l) => l.id === list.id);
+      const todos = findedList.todos.filter((todo) => todo.id !== todoid);
+      const findedTodo = findedList.todos.find((todo) => todo.id === todoid);
+      const lastLists = [...withoutLists, { ...findedList, todos: [...todos, { ...findedTodo, isEdited: true, text: e.target.value }] }];
+      dispatch(editTodo(lastLists));
+      dispatch(updateLocalStore());
+   };
+
    return (
       <div className="container h-full flex justify-center items-center">
          <div className="flex flex-col gap-3">
@@ -82,11 +92,16 @@ export default function List() {
                      if (todo.status === 0) {
                         return (
                            <li
-                              className="flex items-center hover:bg-blueDark py-1 px-1 rounded-sm transition-colors cursor-pointer"
+                              className="flex peer items-center hover:bg-blueDark py-1 px-1 rounded-sm transition-colors cursor-pointer"
                               key={index}
                            >
                               <div className="w-3 h-3 rounded-full bg-light mr-1.5"></div>
-                              <span>{todo.text}</span>
+                              <input
+                                 onInput={(e) => editHandle(e, todo.id)}
+                                 className="bg-transparent outline-none"
+                                 type="text"
+                                 defaultValue={todo.text}
+                              />
                               <button onClick={() => deleteHandle(todo.id)} className="ml-auto">
                                  <TbTrashFilled className="text-xl p-1 rounded-sm box-content transition-transform bg-light text-red hover:scale-110" />
                               </button>
@@ -106,7 +121,12 @@ export default function List() {
                               key={index}
                            >
                               <div className="w-3 h-3 rounded-full bg-yellow mr-1.5"></div>
-                              <span>{todo.text}</span>
+                              <input
+                                 onInput={(e) => editHandle(e, todo.id)}
+                                 className="bg-transparent outline-none"
+                                 type="text"
+                                 defaultValue={todo.text}
+                              />
                               <button onClick={() => deleteHandle(todo.id)} className="ml-auto">
                                  <TbTrashFilled className="text-xl p-1 rounded-sm box-content transition-transform bg-light text-red hover:scale-110" />
                               </button>
@@ -140,6 +160,13 @@ export default function List() {
                      }
                   })}
                </ul>
+               {list.todos.length > 0 && (
+                  <div className="text-sm flex justify-between mt-5 font-bold">
+                     <span>Toplam: {list.todos.length}</span>
+                     <span className="text-yellow">Devam eden: {list.todos.filter((todo) => todo.status === 1).length}</span>
+                     <span className="text-green">Tamamlanan: {list.todos.filter((todo) => todo.status === 2).length}</span>
+                  </div>
+               )}
             </div>
          </div>
       </div>
